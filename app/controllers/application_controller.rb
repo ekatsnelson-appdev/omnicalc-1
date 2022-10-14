@@ -24,10 +24,18 @@ class ApplicationController < ActionController::Base
   end
 
   def calculate_payment
-    @apr = params.fetch("apr").to_f
+    @apr = params.fetch("apr").to_f #to_s(:percentage)
+    @r = @apr / 12
     @num_years = params.fetch("num_years").to_f
-    @principal = params.fetch("principal").to_f
-    @payment = @apr * @num_years * @principal # change this formula later
+    @n = @num_years * 12
+
+    @principal = params.fetch("principal").to_f #.to_s(:currency)
+
+    @numerator = @r * @principal
+    @denomenator = 1 - ((1 + @r) ** (-1 * @n))
+
+    @payment = @numerator / @denomenator
+
     render({ :template => "calculation_templates/payment_results.html.erb" })
   end
 
